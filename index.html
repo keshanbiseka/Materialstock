@@ -335,7 +335,6 @@ footer code{background:var(--panel);padding:1px 4px;border:1px solid var(--rule-
       <select id="matSort" class="only-mobile" aria-label="Sort materials" style="max-width:100%">
         <option value="shortage">Sort: buy the most first</option>
         <option value="cover">Sort: runs out soonest</option>
-        <option value="need">Sort: needed the most</option>
         <option value="stock">Sort: lowest stock</option>
         <option value="name">Sort: by name</option>
       </select>
@@ -593,7 +592,7 @@ function renderMats(){
 
   $("#matNote").textContent=list.length+" shown \u00b7 all in pieces";
   const cols=[["name","Material"],["cat","Type"],["stock","Have now"],["burn","Used a month"],
-    ["cover","How long it lasts"],["need","Need in total"],["shortage","Buy"]];
+    ["cover","How long it lasts"],["shortage","Buy"]];
   const head='<thead><tr>'+cols.map(c=>'<th data-k="'+c[0]+'" '+
     (sortMat.k===c[0]?'aria-sort="'+(sortMat.dir<0?"descending":"ascending")+'"':'')+'>'+c[1]+'</th>').join("")+'</tr></thead>';
 
@@ -612,10 +611,9 @@ function renderMats(){
       '<td data-label="How long it lasts"><span class="runway" title="'+(isFinite(r.cover)?mo(r.cover)+" months":"not used")+'">'+
             '<i class="r-'+r.status+'" style="width:'+pct+'%"></i><u style="left:'+mark+'%"></u></span>'+
           '<span class="rw-num '+(r.cover<H?"miss":"muted")+'">'+(isFinite(r.cover)?mo(r.cover)+" mo":"\u2014")+'</span></td>'+
-      '<td data-label="Need in total">'+cnt(r.need)+'</td>'+
       missCell+
     '</tr>'+(open?detailRow(r):"");
-  }).join(""):'<tr><td colspan="7" class="empty"><strong>Nothing to buy here</strong>'+
+  }).join(""):'<tr><td colspan="6" class="empty"><strong>Nothing to buy here</strong>'+
       'You have enough of everything in this list for the next '+H+' months.</td></tr>';
   $("#matTable").innerHTML=head+"<tbody>"+body+"</tbody>";
 }
@@ -626,7 +624,7 @@ function detailRow(r){
       '<td data-label="Products to make">'+up(u.units)+'</td>'+
       '<td data-label="Uses each">\u00d7 '+u.per+'</td>'+
       '<td data-label="Pieces for this">'+up(u.sub)+'</td></tr>').join("");
-  return '<tr class="detail"><td colspan="7"><div class="detail-in">'+
+  return '<tr class="detail"><td colspan="6"><div class="detail-in">'+
     '<div class="lbl" style="margin-bottom:8px">Used to make '+r.uses.length+' product'+(r.uses.length===1?"":"s")+'</div>'+
     '<table><thead><tr><th style="text-align:left">Product</th><th>Products to make</th><th>Uses each</th>'+
       '<th>Pieces for this</th></tr></thead><tbody>'+rowsHtml+'</tbody></table>'+
