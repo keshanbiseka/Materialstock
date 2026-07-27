@@ -77,6 +77,7 @@ input[type=number],input[type=search],select{font-family:'IBM Plex Mono',monospa
 /* ---------------- drawer ---------------- */
 .drawer{border-top:1px solid var(--rule-2);padding:16px;display:grid;
   grid-template-columns:repeat(auto-fit,minmax(205px,1fr));gap:18px;background:#FCFDFD}
+.drawer-intro{grid-column:1/-1;color:var(--ink-2);font-size:13px;margin-bottom:-4px}
 .ctl label{display:block;margin-bottom:6px}
 .ctl-row{display:flex;align-items:center;gap:8px}
 .ctl-row .unit{font-family:'IBM Plex Mono',monospace;color:var(--ink-3);font-size:13px}
@@ -112,8 +113,8 @@ nav.tabs button[aria-selected=true] .count{background:var(--ink);color:#fff}
 .scroller{overflow-x:auto}
 table{width:100%;border-collapse:collapse;font-size:13px}
 th{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);
-  text-align:right;padding:10px 12px;border-bottom:1px solid var(--rule);white-space:nowrap;
-  position:sticky;top:var(--railH);background:var(--panel);cursor:pointer;user-select:none;z-index:2}
+  text-align:right;padding:10px 12px;border-top:1px solid var(--rule-2);border-bottom:1px solid var(--rule);white-space:nowrap;
+  position:sticky;top:var(--railH);background:var(--panel);cursor:pointer;user-select:none;z-index:5}
 th:first-child,td:first-child{text-align:left}
 th[aria-sort=ascending]::after{content:" ↑";color:var(--ink)}
 th[aria-sort=descending]::after{content:" ↓";color:var(--ink)}
@@ -139,7 +140,7 @@ tr.open .caret{color:var(--ink)}
 tr.detail td{background:#FAFCFD;padding:0;border-bottom:1px solid var(--rule)}
 .detail-in{padding:14px 16px 16px 30px}
 .detail-in table{font-size:12px;width:auto;min-width:min(600px,100%)}
-.detail-in th{position:static;background:transparent;border-bottom:1px solid var(--rule-2);padding:6px 12px;cursor:default}
+.detail-in th{position:static;background:transparent;border-top:0;border-bottom:1px solid var(--rule-2);padding:6px 12px;cursor:default;z-index:auto}
 .detail-in td{padding:6px 12px;border-bottom:0;background:transparent}
 .detail-in td:first-child{min-width:180px}
 
@@ -248,8 +249,8 @@ footer code{background:var(--panel);padding:1px 4px;border:1px solid var(--rule-
 
 <header>
   <div>
-    <h1>Material Runway</h1>
-    <div class="sub">Set how far ahead to plan and see how many pieces of each production material are missing.</div>
+    <h1>What to buy</h1>
+    <div class="sub">Choose how far ahead you're planning, and see how much of each material you still need to buy.</div>
   </div>
   <div class="stamp" id="stamp">Loading…</div>
 </header>
@@ -259,9 +260,9 @@ footer code{background:var(--panel);padding:1px 4px;border:1px solid var(--rule-
 <!-- ============ UPLOAD (fallback only) ============ -->
 <section id="uploadPanel" class="hide">
   <div id="drop">
-    <h2>Drop an Excel file here</h2>
-    <p>Or <label class="link">choose a file<input type="file" id="file" accept=".xlsx,.xls,.xlsm" hidden></label>. It is read in your browser — nothing is uploaded anywhere.</p>
-    <div class="lbl">Tabs it looks for</div>
+    <h2>Add your Excel file to start</h2>
+    <p>Drag it here, or <label class="link">choose a file<input type="file" id="file" accept=".xlsx,.xls,.xlsm" hidden></label>. It stays on your device — nothing is sent anywhere.</p>
+    <div class="lbl">Your file should have these sheets</div>
     <div class="tabs-need"><span>production_stock</span><span>assign</span><span>stock_avarage</span></div>
   </div>
 </section>
@@ -280,34 +281,35 @@ footer code{background:var(--panel);padding:1px 4px;border:1px solid var(--rule-
         </div>
       </div>
       <div class="rail-actions">
-        <button id="assumpBtn" aria-expanded="false">Assumptions</button>
-        <button id="exportBtn" class="solid">Export Excel</button>
+        <button id="assumpBtn" aria-expanded="false">Advanced</button>
+        <button id="exportBtn" class="solid">Download list</button>
         <button id="reload">Other file</button>
       </div>
     </div>
     <div class="drawer hide" id="drawer">
+      <div class="drawer-intro">These are optional. The defaults work fine — only change them if you want to.</div>
       <div class="ctl">
-        <label class="lbl" for="months">Months to plan ahead</label>
-        <div class="ctl-row"><input type="number" id="months" min="1" max="120" step="1" value="24" inputmode="numeric"><span class="unit">mo</span></div>
-        <div class="hint">Any value up to 120 months.</div>
+        <label class="lbl" for="months">How many months ahead</label>
+        <div class="ctl-row"><input type="number" id="months" min="1" max="120" step="1" value="24" inputmode="numeric"><span class="unit">months</span></div>
+        <div class="hint">Same as the slider. You can type any number up to 120.</div>
       </div>
       <div class="ctl">
-        <label class="lbl" for="growth">Yearly demand growth</label>
-        <div class="ctl-row"><input type="number" id="growth" step="1" value="0" inputmode="numeric"><span class="unit">%</span></div>
-        <div class="hint">Compounds monthly. 0 holds today's average flat.</div>
+        <label class="lbl" for="growth">If sales are growing</label>
+        <div class="ctl-row"><input type="number" id="growth" step="1" value="0" inputmode="numeric"><span class="unit">% a year</span></div>
+        <div class="hint">Expecting to sell more each year? Put in how much. Leave at 0 to keep sales steady.</div>
       </div>
       <div class="ctl">
-        <label class="lbl" for="buffer">Wastage &amp; reject buffer</label>
-        <div class="ctl-row"><input type="number" id="buffer" step="1" value="0" inputmode="numeric"><span class="unit">%</span></div>
-        <div class="hint">Extra pieces on top of the forecast.</div>
+        <label class="lbl" for="buffer">Spare for waste &amp; rejects</label>
+        <div class="ctl-row"><input type="number" id="buffer" step="1" value="0" inputmode="numeric"><span class="unit">% extra</span></div>
+        <div class="hint">Add a little extra to cover breakages and mistakes.</div>
       </div>
       <div class="ctl">
-        <label class="lbl" for="netoff">Finished goods on hand</label>
+        <label class="lbl" for="netoff">Stock you've already made</label>
         <select id="netoff">
-          <option value="1" selected>Subtract from what to produce</option>
-          <option value="0">Ignore — produce the full forecast</option>
+          <option value="1" selected>Count it — make less</option>
+          <option value="0">Ignore it — make everything fresh</option>
         </select>
-        <div class="hint">Uses the Quantity column in stock_avarage.</div>
+        <div class="hint">Finished products you have in stock reduce how much you need to make.</div>
       </div>
     </div>
   </div>
@@ -315,9 +317,9 @@ footer code{background:var(--panel);padding:1px 4px;border:1px solid var(--rule-
   <div class="score" id="score"></div>
 
   <nav class="tabs" id="tabs" role="tablist">
-    <button role="tab" data-tab="mat" aria-selected="true">Materials <span class="count" id="cMat">0</span></button>
-    <button role="tab" data-tab="prod" aria-selected="false">Products <span class="count" id="cProd">0</span></button>
-    <button role="tab" data-tab="map" aria-selected="false">Matching <span class="count" id="cMap">0</span></button>
+    <button role="tab" data-tab="mat" aria-selected="true">Materials to buy <span class="count" id="cMat">0</span></button>
+    <button role="tab" data-tab="prod" aria-selected="false">How much to make <span class="count" id="cProd">0</span></button>
+    <button role="tab" data-tab="map" aria-selected="false">Name links <span class="count" id="cMap">0</span></button>
   </nav>
 
   <!-- MATERIALS -->
@@ -325,23 +327,23 @@ footer code{background:var(--panel);padding:1px 4px;border:1px solid var(--rule-
     <div class="toolbar">
       <input type="search" id="matSearch" class="grow" placeholder="Search materials…" aria-label="Search materials">
       <div class="seg" id="matFilters">
-        <button data-f="short" aria-pressed="true">Missing</button>
-        <button data-f="all">All</button>
-        <button data-f="Others">Others</button>
+        <button data-f="short" aria-pressed="true">Need to buy</button>
+        <button data-f="all">Show all</button>
+        <button data-f="Others">Bottles &amp; caps</button>
         <button data-f="Labels">Labels</button>
       </div>
       <select id="matSort" class="only-mobile" aria-label="Sort materials" style="max-width:100%">
-        <option value="shortage">Sort: most missing</option>
-        <option value="cover">Sort: shortest runway</option>
-        <option value="need">Sort: most needed</option>
-        <option value="stock">Sort: least in stock</option>
-        <option value="name">Sort: name</option>
+        <option value="shortage">Sort: buy the most first</option>
+        <option value="cover">Sort: runs out soonest</option>
+        <option value="need">Sort: needed the most</option>
+        <option value="stock">Sort: lowest stock</option>
+        <option value="name">Sort: by name</option>
       </select>
       <span class="lbl no-mobile" id="matNote" style="margin-left:auto"></span>
     </div>
     <div class="scroller"><table id="matTable"></table></div>
     <div class="notice" style="border-top:1px solid var(--rule-2);border-bottom:0;font-size:12px">
-      Every figure is a piece count. <b>Missing</b> is how many extra pieces you must buy to cover the window. The runway bar shows how long stock lasts at today's usage — the mark is the end of your window. Tap a row for the products that consume it.
+      All numbers are counts of pieces. <b>Buy</b> is how many more you need to order. The bar shows how long your current stock will last — if it stops before the line, you'll run out before your plan ends. Tap any row to see which products use it.
     </div>
   </section>
 
@@ -350,10 +352,10 @@ footer code{background:var(--panel);padding:1px 4px;border:1px solid var(--rule-
     <div class="toolbar">
       <input type="search" id="prodSearch" class="grow" placeholder="Search products…" aria-label="Search products">
       <select id="prodSort" class="only-mobile" aria-label="Sort products" style="max-width:100%">
-        <option value="produce">Sort: most to produce</option>
-        <option value="avg">Sort: fastest selling</option>
-        <option value="onHand">Sort: most on hand</option>
-        <option value="name">Sort: name</option>
+        <option value="produce">Sort: make the most first</option>
+        <option value="avg">Sort: best sellers</option>
+        <option value="onHand">Sort: most in stock</option>
+        <option value="name">Sort: by name</option>
       </select>
       <span class="lbl no-mobile" id="prodNote" style="margin-left:auto"></span>
     </div>
@@ -363,25 +365,25 @@ footer code{background:var(--panel);padding:1px 4px;border:1px solid var(--rule-
   <!-- MAPPING -->
   <section class="panel hide" id="tab-map">
     <div class="notice">
-      Product names are written differently in <code>assign</code> and <code>stock_avarage</code>, so each sales line was matched to a recipe automatically. Correct anything wrong here — the counts update straight away.
+      The same product is named slightly differently in your two sheets, so the app paired them up for you. Check them below and fix any that are wrong — the numbers update right away.
     </div>
     <div class="toolbar">
       <input type="search" id="mapSearch" class="grow" placeholder="Search products…" aria-label="Search product matches">
       <div class="seg" id="mapFilters">
-        <button data-f="all" aria-pressed="true">All</button>
-        <button data-f="check">Needs a look</button>
-        <button data-f="none">Unmatched</button>
+        <button data-f="all" aria-pressed="true">Show all</button>
+        <button data-f="check">Worth checking</button>
+        <button data-f="none">Not paired</button>
       </div>
     </div>
     <div id="mapList"></div>
     <div class="notice" style="border-top:1px solid var(--rule-2);border-bottom:0">
-      <div class="lbl" style="margin-bottom:8px">Materials used in assign but absent from production_stock</div>
+      <div class="lbl" style="margin-bottom:8px">Materials with no stock count in your file</div>
       <div id="missingMats" class="mono" style="font-size:12px;color:var(--ink-2);line-height:1.9"></div>
     </div>
   </section>
 </div>
 
-<footer>Monthly demand comes from <code>average</code> in stock_avarage. Pieces needed = units to produce × <code>Quantity Per Main</code> in assign, rounded up. Stock on hand comes from <code>production_stock</code>.</footer>
+<footer>How it works: it takes how many of each product you sell per month, works out how many you'll need over your chosen period, then counts up the bottles, caps and labels that go into them — and subtracts what you already have in stock.</footer>
 </div>
 
 <script>
@@ -558,18 +560,18 @@ function render(){
   $$("#app .presets button").forEach(b=>b.setAttribute("aria-pressed",String(+b.dataset.m===H)));
 
   $("#score").innerHTML=
-    '<div><div class="lbl">Pieces missing</div>'+
+    '<div><div class="lbl">Total pieces to buy</div>'+
       '<div class="v '+(pieces?"short":"ok")+'">'+cnt(pieces)+'</div>'+
-      '<div class="note">to cover '+H+' months</div></div>'+
-    '<div><div class="lbl">Materials short</div>'+
-      '<div class="v '+(short.length?"short":"ok")+'">'+short.length+'<small>/'+rows.length+'</small></div>'+
-      (noRec?'<div class="note watch">'+noRec+' with no stock record</div>':'<div class="note">all have stock records</div>')+'</div>'+
-    '<div><div class="lbl">First to run out</div>'+
-      (soonest?'<div class="v name">'+esc(soonest.name)+'</div><div class="note '+(soonest.cover<H?"short":"")+'">'+mo(soonest.cover)+' months of cover</div>'
-              :'<div class="v name muted">Nothing is being consumed</div>')+'</div>'+
-    '<div><div class="lbl">Products forecast</div>'+
-      '<div class="v">'+(prods.length-unmapped.length)+'<small>/'+prods.length+'</small></div>'+
-      (unmapped.length?'<div class="note watch">'+unmapped.length+' unmatched \u2014 see Matching</div>':'<div class="note">all matched</div>')+'</div>';
+      '<div class="note">for the next '+H+' months</div></div>'+
+    '<div><div class="lbl">Materials to order</div>'+
+      '<div class="v '+(short.length?"short":"ok")+'">'+short.length+'<small> of '+rows.length+'</small></div>'+
+      (noRec?'<div class="note watch">'+noRec+' have no stock count</div>':'<div class="note">rest have enough</div>')+'</div>'+
+    '<div><div class="lbl">Runs out first</div>'+
+      (soonest?'<div class="v name">'+esc(soonest.name)+'</div><div class="note '+(soonest.cover<H?"short":"")+'">lasts about '+mo(soonest.cover)+' months</div>'
+              :'<div class="v name muted">Nothing is being used up</div>')+'</div>'+
+    '<div><div class="lbl">Products covered</div>'+
+      '<div class="v">'+(prods.length-unmapped.length)+'<small> of '+prods.length+'</small></div>'+
+      (unmapped.length?'<div class="note watch">'+unmapped.length+' need pairing \u2014 see Name links</div>':'<div class="note">all set up</div>')+'</div>';
 
   $("#cMat").textContent=rows.length;
   $("#cProd").textContent=prods.length;
@@ -589,9 +591,9 @@ function renderMats(){
     return typeof x==="string"?sortMat.dir*x.localeCompare(y)
       :sortMat.dir*((x===Infinity?1e15:x)-(y===Infinity?1e15:y));});
 
-  $("#matNote").textContent=list.length+" shown \u00b7 piece counts";
-  const cols=[["name","Material"],["cat","Type"],["stock","In stock (pcs)"],["burn","Used / month (pcs)"],
-    ["cover","Runway"],["need","Needed, "+H+" mo (pcs)"],["shortage","Missing (pcs)"]];
+  $("#matNote").textContent=list.length+" shown \u00b7 all in pieces";
+  const cols=[["name","Material"],["cat","Type"],["stock","Have now"],["burn","Used a month"],
+    ["cover","How long it lasts"],["need","Need in total"],["shortage","Buy"]];
   const head='<thead><tr>'+cols.map(c=>'<th data-k="'+c[0]+'" '+
     (sortMat.k===c[0]?'aria-sort="'+(sortMat.dir<0?"descending":"ascending")+'"':'')+'>'+c[1]+'</th>').join("")+'</tr></thead>';
 
@@ -599,36 +601,35 @@ function renderMats(){
     const span=H*1.6, pct=Math.max(2,Math.min(100,Math.min(r.cover,span)/span*100)), mark=100/1.6;
     const open=openRows.has(r.name);
     const missCell=r.shortage>0
-      ? '<td class="card-miss" data-label="Missing"><span class="miss">'+cnt(r.shortage)+' pcs</span></td>'
-      : '<td class="card-ok" data-label="Missing"><span>enough in stock</span></td>';
+      ? '<td class="card-miss" data-label="Buy"><span class="miss">'+cnt(r.shortage)+' more</span></td>'
+      : '<td class="card-ok" data-label="Buy"><span>you have enough</span></td>';
     return '<tr class="row'+(open?" open":"")+'" data-row="'+esc(r.name)+'" tabindex="0">'+
       '<td><span class="caret">'+(open?"\u25be":"\u25b8")+'</span> '+esc(r.name)+
-        (r.known?"":' <span class="tag t-none">no stock record</span>')+'</td>'+
+        (r.known?"":' <span class="tag t-none">no stock count</span>')+'</td>'+
       '<td class="muted" style="text-align:left" data-label="Type">'+esc(r.cat)+'</td>'+
-      '<td data-label="In stock">'+cnt(r.stock)+'</td>'+
-      '<td data-label="Used / month" title="'+r.burn.toFixed(2)+' exact">'+cnt(r.burn)+'</td>'+
-      '<td data-label="Runway"><span class="runway" title="'+(isFinite(r.cover)?mo(r.cover)+" months of cover":"not consumed")+'">'+
+      '<td data-label="Have now">'+cnt(r.stock)+'</td>'+
+      '<td data-label="Used a month" title="'+r.burn.toFixed(2)+' exact">'+cnt(r.burn)+'</td>'+
+      '<td data-label="How long it lasts"><span class="runway" title="'+(isFinite(r.cover)?mo(r.cover)+" months":"not used")+'">'+
             '<i class="r-'+r.status+'" style="width:'+pct+'%"></i><u style="left:'+mark+'%"></u></span>'+
           '<span class="rw-num '+(r.cover<H?"miss":"muted")+'">'+(isFinite(r.cover)?mo(r.cover)+" mo":"\u2014")+'</span></td>'+
-      '<td data-label="Needed, '+H+' mo">'+cnt(r.need)+'</td>'+
+      '<td data-label="Need in total">'+cnt(r.need)+'</td>'+
       missCell+
     '</tr>'+(open?detailRow(r):"");
-  }).join(""):'<tr><td colspan="7" class="empty"><strong>Nothing missing here</strong>'+
-      'Every material in this view covers the full '+H+' months.</td></tr>';
+  }).join(""):'<tr><td colspan="7" class="empty"><strong>Nothing to buy here</strong>'+
+      'You have enough of everything in this list for the next '+H+' months.</td></tr>';
   $("#matTable").innerHTML=head+"<tbody>"+body+"</tbody>";
 }
 
 function detailRow(r){
   const rowsHtml=r.uses.map(u=>'<tr>'+
       '<td style="text-align:left">'+esc(u.product)+'</td>'+
-      '<td data-label="Units to make">'+up(u.units)+'</td>'+
-      '<td data-label="Pcs per unit">\u00d7 '+u.per+'</td>'+
-      '<td data-label="Pieces needed">'+up(u.sub)+'</td>'+
-      '<td data-label="Pcs / month">'+cnt(u.monthly)+'</td></tr>').join("");
+      '<td data-label="Products to make">'+up(u.units)+'</td>'+
+      '<td data-label="Uses each">\u00d7 '+u.per+'</td>'+
+      '<td data-label="Pieces for this">'+up(u.sub)+'</td></tr>').join("");
   return '<tr class="detail"><td colspan="7"><div class="detail-in">'+
-    '<div class="lbl" style="margin-bottom:8px">Consumed by '+r.uses.length+' product'+(r.uses.length===1?"":"s")+'</div>'+
-    '<table><thead><tr><th style="text-align:left">Product</th><th>Units to make</th><th>Pcs per unit</th>'+
-      '<th>Pieces needed</th><th>Pcs / month</th></tr></thead><tbody>'+rowsHtml+'</tbody></table>'+
+    '<div class="lbl" style="margin-bottom:8px">Used to make '+r.uses.length+' product'+(r.uses.length===1?"":"s")+'</div>'+
+    '<table><thead><tr><th style="text-align:left">Product</th><th>Products to make</th><th>Uses each</th>'+
+      '<th>Pieces for this</th></tr></thead><tbody>'+rowsHtml+'</tbody></table>'+
   '</div></td></tr>';
 }
 
@@ -640,20 +641,20 @@ function renderProds(){
   list.sort((a,b)=>{const x=a[k]==null?"":a[k],y=b[k]==null?"":b[k];
     return typeof x==="string"?sortProd.dir*String(x).localeCompare(String(y)):sortProd.dir*(x-y);});
   $("#prodNote").textContent=list.length+" shown";
-  const cols=[["name","Product"],["brand","Brand"],["avg","Sold / month"],["onHand","Finished on hand"],
-    ["demand","Demand, "+H+" mo"],["produce","Units to produce"],["units","Materials"],["main","Matched recipe"]];
+  const cols=[["name","Product"],["brand","Brand"],["avg","Sold a month"],["onHand","Have in stock"],
+    ["demand","Need in "+H+" mo"],["produce","Make this many"],["units","Materials"],["main","Paired with"]];
   $("#prodTable").innerHTML='<thead><tr>'+cols.map(c=>'<th data-k="'+c[0]+'" '+
       (sortProd.k===c[0]?'aria-sort="'+(sortProd.dir<0?"descending":"ascending")+'"':'')+'>'+c[1]+'</th>').join("")+'</tr></thead><tbody>'+
     (list.length?list.map(p=>'<tr>'+
       '<td>'+esc(p.name)+(p.code?'<div class="lbl" style="letter-spacing:.06em">'+esc(p.code)+'</div>':'')+'</td>'+
       '<td class="muted" style="text-align:left" data-label="Brand">'+esc(p.brand)+'</td>'+
-      '<td data-label="Sold / month">'+mo(p.avg)+'</td>'+
-      '<td data-label="Finished on hand">'+cnt(p.onHand)+'</td>'+
-      '<td data-label="Demand, '+H+' mo">'+up(p.demand)+'</td>'+
-      '<td class="big" data-label="Units to produce">'+up(p.produce)+'</td>'+
+      '<td data-label="Sold a month">'+mo(p.avg)+'</td>'+
+      '<td data-label="Have in stock">'+cnt(p.onHand)+'</td>'+
+      '<td data-label="Need in '+H+' mo">'+up(p.demand)+'</td>'+
+      '<td class="big" data-label="Make this many">'+up(p.produce)+'</td>'+
       '<td class="'+(p.units?"muted":"")+'" data-label="Materials">'+(p.units||"\u2014")+'</td>'+
-      '<td style="text-align:left;white-space:normal" class="'+(p.mapped?"muted":"")+'" data-label="Recipe">'+
-        (p.mapped?esc(p.main):'<span class="tag t-watch">no recipe \u2014 not counted</span>')+'</td>'+
+      '<td style="text-align:left;white-space:normal" class="'+(p.mapped?"muted":"")+'" data-label="Paired with">'+
+        (p.mapped?esc(p.main):'<span class="tag t-watch">not paired \u2014 skipped</span>')+'</td>'+
     '</tr>').join(""):'<tr><td colspan="8" class="empty"><strong>No products match that search</strong></td></tr>')
     +'</tbody>';
 }
@@ -676,52 +677,60 @@ function renderMap(){
       '<div><div>'+esc(p.name)+'</div><div class="lbl" style="letter-spacing:.06em">'+esc(p.code)+' \u00b7 '+mo(p.avg)+'/mo</div></div>'+
       '<div class="arrow">\u2192</div>'+
       '<div><select data-prod="'+esc(p.name)+'" aria-label="Recipe for '+esc(p.name)+'">'+
-        '<option value="">\u2014 no recipe \u2014</option>'+opts+'</select></div>'+
-      '<div class="conf '+cls+'">'+(cur?Math.round(sc*100)+"% match":"unmatched")+'</div>'+
+        '<option value="">\u2014 not paired \u2014</option>'+opts+'</select></div>'+
+      '<div class="conf '+cls+'">'+(cur?(sc>=0.9?"good match":sc>=0.6?"probably ok":"please check"):"not paired")+'</div>'+
     '</div>';}).join("")
-    :'<div class="empty"><strong>Nothing in this view</strong>Every product here is matched.</div>';
+    :'<div class="empty"><strong>Nothing to show here</strong>Every product in this view is paired up.</div>';
 
   const missing=[...new Set(RESULT.rows.filter(r=>!r.known).map(r=>r.name))];
   $("#missingMats").innerHTML=missing.length
-    ? missing.map(m=>esc(m)).join("<br>")+'<div class="hint" style="margin-top:8px">Counted as zero stock, so their full requirement shows as missing.</div>'
-    : "Every material has a stock record.";
+    ? missing.map(m=>esc(m)).join("<br>")+'<div class="hint" style="margin-top:8px">Your file has no stock count for these, so they\u2019re treated as zero \u2014 you may just need to add them to your stock sheet.</div>'
+    : "Every material has a stock count.";
 }
 
 /* ============ export ============ */
 function exportXlsx(){
   const {H,rows,prods}=RESULT;
   const wb=XLSX.utils.book_new();
-  const mat=rows.map(r=>{const o={"Material":r.name,"Type":r.cat,"In stock (pcs)":r.stock,
-    "Used per month (pcs)":Math.round(r.burn),"Runway (months)":isFinite(r.cover)?+r.cover.toFixed(1):"",
-    "In production_stock":r.known?"yes":"no"};
-    o["Needed for "+H+" months (pcs)"]=r.need;
-    o["Missing (pcs)"]=r.shortage;
-    return o;}).sort((a,b)=>b["Missing (pcs)"]-a["Missing (pcs)"]);
-  XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(mat),"materials");
+  const mat=rows.map(r=>{const o={"Material":r.name,"Type":r.cat,"Have now":r.stock,
+    "Used a month":Math.round(r.burn),"Lasts (months)":isFinite(r.cover)?+r.cover.toFixed(1):"",
+    "Has stock count":r.known?"yes":"no"};
+    o["Need in "+H+" months"]=r.need;
+    o["Buy"]=r.shortage;
+    return o;}).sort((a,b)=>b["Buy"]-a["Buy"]);
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(mat),"all materials");
   XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(
-    mat.filter(r=>r["Missing (pcs)"]>0).map(r=>({"Material":r.Material,"Type":r.Type,
-      "Missing (pcs)":r["Missing (pcs)"],"In stock (pcs)":r["In stock (pcs)"]}))),"order list");
+    mat.filter(r=>r["Buy"]>0).map(r=>({"Material":r.Material,"Type":r.Type,
+      "Buy":r["Buy"],"Have now":r["Have now"]}))),"shopping list");
   XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(prods.map(p=>{
-    const o={"Product":p.name,"Code":p.code,"Brand":p.brand,"Sold per month":+p.avg.toFixed(2),
-      "Finished on hand":Math.round(p.onHand)};
-    o["Demand over "+H+" months"]=Math.ceil(p.demand);
-    o["Units to produce"]=Math.ceil(p.produce);
-    o["Matched recipe"]=p.main||"NOT MATCHED";
-    return o;})),"production plan");
+    const o={"Product":p.name,"Code":p.code,"Brand":p.brand,"Sold a month":+p.avg.toFixed(2),
+      "Have in stock":Math.round(p.onHand)};
+    o["Need in "+H+" months"]=Math.ceil(p.demand);
+    o["Make this many"]=Math.ceil(p.produce);
+    o["Paired with"]=p.main||"NOT PAIRED";
+    return o;})),"how much to make");
   XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet([
-    ["Setting","Value"],["Months planned ahead",H],["Yearly demand growth %",num($("#growth").value)],
-    ["Wastage buffer %",num($("#buffer").value)],["Finished goods subtracted",$("#netoff").value==="1"?"yes":"no"],
-    ["Generated",new Date().toLocaleString()]]),"settings");
-  XLSX.writeFile(wb,"material-plan-"+H+"mo.xlsx");
+    ["Setting","Value"],["Months ahead",H],["Sales growth % a year",num($("#growth").value)],
+    ["Spare for waste %",num($("#buffer").value)],["Counted stock already made",$("#netoff").value==="1"?"yes":"no"],
+    ["Made on",new Date().toLocaleString()]]),"settings");
+  XLSX.writeFile(wb,"what-to-buy-"+H+"months.xlsx");
 }
 
 /* ============ wiring ============ */
 function syncRail(){
   const r=$(".rail");
-  if(r)document.documentElement.style.setProperty("--railH",
-    (window.getComputedStyle(r).position==="sticky"?r.offsetHeight:0)+"px");
+  if(!r)return;
+  const h=window.getComputedStyle(r).position==="sticky"?Math.round(r.getBoundingClientRect().height):0;
+  document.documentElement.style.setProperty("--railH",h+"px");
 }
 window.addEventListener("resize",syncRail);
+window.addEventListener("load",syncRail);
+if(document.fonts&&document.fonts.ready)document.fonts.ready.then(syncRail);
+if(window.ResizeObserver){
+  const ro=new ResizeObserver(()=>syncRail());
+  const railEl=$(".rail");
+  if(railEl)ro.observe(railEl);
+}
 
 function loadFile(f){
   $("#errbox").innerHTML="";
